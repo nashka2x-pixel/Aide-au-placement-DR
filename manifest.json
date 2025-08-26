@@ -1,0 +1,20 @@
+{
+  "name": "Gestion Dragon Ride",
+  "short_name": "DR",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#0b72e7",
+  "theme_color": "#0b72e7",
+  "icons": 
+    {
+      "src": "https://i.postimg.cc/bNySCWxY/Design-sans-titre-2.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://i.postimg.cc/bNySCWxY/Design-sans-titre-2.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
