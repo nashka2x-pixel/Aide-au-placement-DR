@@ -93,31 +93,31 @@
 
   /* "Places : XX" */
   .remain{
-    position:absolute; left:14px; right:14px; bottom:175px;
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    gap:4px; z-index:2; color:#ffd54a; text-align:center;
+  position:absolute; left:14px; right:14px; bottom:165px;   /* ↓ un peu plus bas qu’avant (175px) */
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:6px; z-index:2; color:#ffd54a; text-align:center;
+}
+
+/* le libellé passe AU-DESSUS, le nombre en dessous */
+.remain .label{
+  order:-1;
+  font-size:18px; font-weight:700; line-height:1.2; opacity:.95;
 }
 .remain .num{
-    order:-1; /* fait passer le chiffre au-dessus du texte */
-    font-size:40px;
-    font-weight:900;
-    line-height:1;
+  font-size:40px; font-weight:900; line-height:1;
 }
-.remain .label{
-    font-size:18px;
-    font-weight:700;
-    line-height:1.2;
-    opacity:.95;
-}
+
 
   /* Bouton – */
   .minus{
-    position:absolute; left:12px; right:12px; bottom:16px; height:96px;
-    border:none; border-radius:12px; background:#e63946; color:#ffeae6;
-    font-weight:900; font-size:42px; line-height:1;
-    box-shadow:0 10px 24px rgba(0,0,0,.55); cursor:pointer;
-    z-index:4; /* passe au-dessus des points */
-  }
+  position:absolute; left:12px; right:12px; bottom:28px;    /* ← 16px → 28px : bouton un peu plus haut */
+  height:96px;
+  border:none; border-radius:12px; background:#e63946; color:#ffeae6;
+  font-weight:900; font-size:42px; line-height:1;
+  box-shadow:0 10px 24px rgba(0,0,0,.55); cursor:pointer;
+  z-index:4;
+ }
+
 
   /* --------- MODAL Réserver --------- */
   .modal-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; align-items:center; justify-content:center; padding:18px; z-index:50; }
@@ -159,18 +159,18 @@
     .rail{ gap:20px; }
     .tower{ padding:130px 10px 185px; min-height: 76vh; }
     .tower.short{ min-height: 70vh; }
-    .remain{ bottom:175px; }
+    .remain{ bottom:165px; }    /* au lieu de 175px */
     .remain .num{ font-size:36px; }
-    .minus{ height:88px; font-size:38px; }
+    .minus{ bottom:24px; }
   }
   @media (max-width: 700px){
     .dot{ width:30px; height:30px; }
     .rail{ gap:16px; }
     .tower{ padding:120px 8px 190px; min-height: 74vh; }
     .tower.short{ min-height: 68vh; }
-    .remain{ bottom:180px; }
+    .remain{ bottom:170px; }    /* au lieu de 180px */
     .remain .num{ font-size:32px; }
-    .minus{ height:80px; font-size:36px; }
+    .minus{ bottom:24px; }
   }
 </style>
 </head>
