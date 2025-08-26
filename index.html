@@ -55,21 +55,14 @@
   }
 
   .tower{
-  position:relative; display:flex; flex-direction:column; align-items:center;
-  background: rgba(18,18,22,.88);
-  border:1px solid rgba(255,140,0,.22); border-radius:14px;
-  box-shadow:0 10px 24px rgba(0,0,0,.5), inset 0 0 0 1px rgba(255,255,255,.04);
-  padding: 140px 12px 170px;   /* ↓ réduit de 190px → 170px */
-  min-height: 78vh;
-  overflow:hidden; cursor:pointer; backdrop-filter: blur(2px);
- }
-
-.remain{
-  position:absolute; left:14px; right:14px; bottom:155px;  /* ↓ 175px → 155px */
-  display:flex; align-items:flex-end; justify-content:center; gap:10px; z-index:2;
-  color:#ffd54a;
-}
-
+    position:relative; display:flex; flex-direction:column; align-items:center;
+    background: rgba(18,18,22,.88);
+    border:1px solid rgba(255,140,0,.22); border-radius:14px;
+    box-shadow:0 10px 24px rgba(0,0,0,.5), inset 0 0 0 1px rgba(255,255,255,.04);
+    /* ↑ plus d’espace en bas pour éviter chevauchement */
+    padding: 140px 12px 190px;
+    min-height: 78vh;
+    overflow:hidden; cursor:pointer; backdrop-filter: blur(2px);
   }
   .tower.short{ min-height: 72vh; }
 
@@ -101,11 +94,21 @@
   /* "Places : XX" */
   .remain{
     position:absolute; left:14px; right:14px; bottom:175px;
-    display:flex; align-items:flex-end; justify-content:center; gap:10px; z-index:2;
-    color:#ffd54a;
-  }
-  .remain .label{ font-size:18px; font-weight:700; line-height:1.2; opacity:.95; }
-  .remain .num{ font-size:40px; font-weight:900; line-height:1; }
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:4px; z-index:2; color:#ffd54a; text-align:center;
+}
+.remain .num{
+    order:-1; /* fait passer le chiffre au-dessus du texte */
+    font-size:40px;
+    font-weight:900;
+    line-height:1;
+}
+.remain .label{
+    font-size:18px;
+    font-weight:700;
+    line-height:1.2;
+    opacity:.95;
+}
 
   /* Bouton – */
   .minus{
@@ -154,18 +157,18 @@
   @media (max-width: 900px){
     .dot{ width:34px; height:34px; }
     .rail{ gap:20px; }
-    .tower{ padding:130px 10px 165px; min-height: 76vh; }   /* 185px → 165px */
+    .tower{ padding:130px 10px 185px; min-height: 76vh; }
     .tower.short{ min-height: 70vh; }
-    .remain{ bottom:150px; }  /* 175px → 150px */
+    .remain{ bottom:175px; }
     .remain .num{ font-size:36px; }
     .minus{ height:88px; font-size:38px; }
   }
   @media (max-width: 700px){
     .dot{ width:30px; height:30px; }
     .rail{ gap:16px; }
-    .tower{ padding:120px 8px 170px; min-height: 74vh; }    /* 190px → 170px */
+    .tower{ padding:120px 8px 190px; min-height: 74vh; }
     .tower.short{ min-height: 68vh; }
-    .remain{ bottom:155px; }  /* 180px → 155px */
+    .remain{ bottom:180px; }
     .remain .num{ font-size:32px; }
     .minus{ height:80px; font-size:36px; }
   }
