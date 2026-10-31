@@ -1,678 +1,565 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>OctoCash</title>
-
-  <!-- Icône et manifest -->
-  <link rel="icon" type="image/png" href="https://i.postimg.cc/W42shZTD/Chat-GPT-Image-22-sept-2025-19-00-20.png">
-<link rel="apple-touch-icon" href="https://i.postimg.cc/W42shZTD/Chat-GPT-Image-22-sept-2025-19-00-20.png">
-<meta name="apple-mobile-web-app-title" content="OctoCash">
-<meta name="application-name" content="OctoCash">
-
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="utf-8">
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Inventaire — Bundles</title>
   <style>
-    /* === Fond tentacules (gris sombre + or) === */
-    :root {
-      --bg-url: url('https://i.postimg.cc/fbwbZdVb/Chat-GPT-Image-22-sept-2025-14-08-38.png');
-      --gold: #ffd166; /* accent or */
-    }
-
-    html, body { height: 100%; }
-
-    body {
-      background: #111;
-      color: #f1f1f1;
-      position: relative;
-      overflow-x: hidden;
-    }
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(to bottom, rgba(0,0,0,.3), rgba(0,0,0,.6)),
-        var(--bg-url);
-      background-size: cover;
-      background-position: center top;
-      background-repeat: no-repeat;
-      z-index: -1;
-    }
-    @media (max-width: 640px){
-      body::before { position: absolute; }
-    }
-@media (max-width: 420px){
-  /* compacter le tableau */
-  table.w-full td, table.w-full th { padding: .35rem .4rem; }
-  /* réduire un poil la taille du total pour éviter les coupes */
-  #totalCaisse { font-size: 1.5rem; } /* avant: text-2xl ~1.5rem, ajuste si besoin */
-  /* inputs + select un peu plus étroits */
-  #tbody input[type="number"] { width: 3.5rem; }  /* ~56px */
-  #tbody select { width: 1.5rem; padding-left: .25rem; padding-right: .25rem; }
+:root {
+--blue:#0b74ff}
+* {
+box-sizing:border-box}
+html,body {
+margin:0;
+font-family:system-ui,sans-serif;
+background:#f6f7fb}
+.hidden {
+display:none!important}
+    header {
+padding:12px;
+background:#fff;
+border-bottom:1px solid #e9e9ee;
+position:sticky;
+top:0;
+z-index:3}
+.topbar,.actions,.toolbar,.row {
+display:flex;
+gap:10px;
+align-items:center;
+flex-wrap:wrap}
+.topbar {
+justify-content:space-between}
+h1 {
+font-size:18px;
+margin:0}
+.content {
+padding:12px}
+.card,.bundle-item {
+background:#fff;
+border:1px solid #e7e7ee;
+border-radius:12px;
+padding:12px;
+margin-bottom:10px}
+button {
+font-size:16px;
+background:var(--blue);
+color:#fff;
+border:0;
+border-radius:10px;
+padding:8px 12px;
+cursor:pointer}
+button:disabled {
+opacity:.55;
+cursor:not-allowed}
+.secondary {
+background:#eef2f7;
+color:var(--blue)}
+input,select {
+font-size:16px;
+padding:10px 12px;
+border:1px solid #d9d9e3;
+border-radius:10px;
+background:#fff}
+.muted,.meta {
+font-size:12px;
+color:#666}
+.bundle-list {
+display:grid;
+gap:10px}
+.bundle-item {
+display:flex;
+gap:12px;
+align-items:center;
+margin:0}
+.bundle-item.bundle-ready {
+  background: #e8f8ec;
+  border: 2px solid #43ad4d;
+  box-shadow: 0 2px 8px rgba(67, 173, 77, 0.18);
 }
-
-    /* Inputs numériques -> clavier numérique sur mobile et suppression du style bleu */
-    input[type=number],
-    select {
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      appearance: none;
-      background-color: #0a0a0a !important;
-      color: #f1f1f1 !important;
-      border: 1px solid #000 !important;
-      box-shadow: none !important;
-      outline: none;
-    }
-    /* Supprimer les flèches ↑↓ des input number */
-    input[type=number]::-webkit-inner-spin-button,
-    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-    input[type=number] { -moz-appearance: textfield; }
-
-    /* Utilitaires */
-    .mono { font-variant-numeric: tabular-nums; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
-    .sticky-cta { position: sticky; bottom: 0; background: rgba(24,24,24,0.95); padding: .5rem; border-top: 1px solid rgba(120,120,120,.35); backdrop-filter: blur(6px); }
-
-    /* Mise en avant des totaux */
-    #totalCaisse { color: var(--gold); text-shadow: 0 0 6px rgba(255,210,80,.25); }
-    [data-total] { font-weight: 700; color: var(--gold); }
-
-    /* Tables/cards en gris neutre */
-    table thead { background: rgba(75,75,75,.9); }
-    table tfoot { background: rgba(45,45,45,.9); }
-    .card { background: rgba(32,32,32,.85); border: 1px solid rgba(120,120,120,.45); }
-
-    /* Radios custom or, sans bleu */
-    .radio-gold {
-      appearance: none; -webkit-appearance: none; -moz-appearance: none;
-      width: 1.25rem; height: 1.25rem; border-radius: 9999px;
-      border: 2px solid #bbb;
-      background-color: #333;
-      cursor: pointer; position: relative; display: inline-block;
-    }
-    .radio-gold:checked {
-      background-color: #ffd166;
-      border-color: #ffd166;
-    }
-
-    #fondCancel {
-      background-color: #1f1f1f !important;
-      color: #e5e5e5 !important;
-      border: 1px solid #444 !important;
-    }
-    #fondCancel:hover { background-color: #333 !important; }
-
-    /* Radios + labels du modal : pas de bleu, style dark+or */
-    #fondModal, #fondModal * { -webkit-tap-highlight-color: transparent; }
-    #fondModal label { user-select: none; }
-    #fondModal label {
-      background-color: rgba(0,0,0,.20) !important;
-      border-color: #565656 !important;
-      transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease;
-    }
-    #fondModal label:hover {
-      background-color: #2b2b2b !important;
-      border-color: #6b6b6b !important;
-    }
-    #fondModal input[type="radio"].radio-gold:focus {
-      outline: none !important;
-      box-shadow: 0 0 0 2px rgba(255,209,102,.25);
-      border-radius: 9999px;
-    }
-    #fondModal label:has(.radio-gold:checked) {
-      background-color: #1f1a12 !important;
-      border-color: #b08900 !important;
-      box-shadow: 0 0 0 2px rgba(255,209,102,.30);
-    }
-    #fondModal ::selection { background: rgba(255,209,102,.28); color: #fff; }
-
-    /* Signature */
-    .signature {
-      margin: 2rem auto 1.5rem;
-      display: flex; align-items: center; justify-content: center; gap: .6rem;
-      color: #e5e5e5; opacity: .85; font-weight: 600;
-    }
-    .signature svg { width: 18px; height: 18px; display: inline-block; }
-
-/* Empêche le zoom automatique sur iOS quand on clique sur un input */
-  input,
-  select,
-  textarea {
-    font-size: 16px !important;
-  }
+.bundle-item.bundle-ready .title {
+  color: #176b27;
+}
+.bundle-item .icon {
+font-size:24px}
+.bundle-item .body {
+display:grid;
+gap:4px}
+.bundle-item .title {
+font-weight:700}
+.bundle-item .actions {
+margin-left:auto}
+.badges {
+display:flex;
+gap:6px;
+flex-wrap:wrap}
+.badge {
+padding:4px 9px;
+border-radius:99px;
+font-size:12px;
+font-weight:700}
+.phase1 {
+background:#fff4ce;
+color:#7a5b00}
+.phase2 {
+background:#e6ffed;
+color:#0b6b2f}
+.final {
+background:#e8e6ff;
+color:#3726b0}
+.count {
+background:#f0f7ff;
+color:#0b74ff}
+.dirty {
+background:#fff3cd;
+color:#856404}
+.cloud {
+background:#e9f3ff;
+color:#0759a7}
+.pending {
+background:#ffe8cc;
+color:#9a5c00}
+.ready {
+background:#dffae3;
+color:#0b6b2f}
+.conflict {
+background:#ffe0e0;
+color:#a30000}
+.save-btn {
+background:#198754}
+.save-btn.dirty {
+background:#e38800}
+.spacer {
+flex:1}
+    #bundleTableWrap,#bundleSearchResults {
+width:100%;
+overflow-x:auto}
+.inventory-table,.search-table {
+width:100%;
+border-collapse:collapse;
+background:#fff;
+table-layout:auto}
+.inventory-table th,.inventory-table td,.search-table th,.search-table td {
+padding:8px;
+border-bottom:1px solid #efeff5;
+font-size:14px;
+vertical-align:middle;
+text-align:left}
+.inventory-table th {
+background:#fafaff}
+.inventory-table .col-line {
+width:7%;
+white-space:nowrap}
+.inventory-table .col-barcode {
+width:18%;
+white-space:nowrap}
+.inventory-table .col-irec {
+width:15%;
+white-space:nowrap}
+.inventory-table .col-reference {
+width:auto;
+min-width:220px}
+.inventory-table .col-count {
+width:120px;
+min-width:120px;
+white-space:nowrap;
+text-align:center}
+.inventory-table .col-remove {
+width:80px;
+min-width:80px;
+white-space:nowrap;
+text-align:center}
+.inventory-table .qty {
+width:88px;
+min-width:72px;
+text-align:right}
+.inventory-table .ellipsis {
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+max-width:1px}
+.qty.warn-final {
+border:2px solid #ff3b30!important;
+background:#fff5f5}
+.notice {
+padding:10px;
+border-radius:10px;
+background:#ecffef;
+color:#0b6b2f}
+tr.row-highlight, tr.row-highlight td {
+background:#dceeff!important;
+transition:background-color .25s ease}
+    .numpad-overlay {
+position:fixed;
+inset:0;
+z-index:2000;
+display:none;
+background:transparent;
+pointer-events:none}
+.numpad-overlay.show {
+display:block}
+.numpad {
+position:absolute;
+right:max(16px,env(safe-area-inset-right));
+bottom:max(16px,env(safe-area-inset-bottom));
+width:300px;
+max-width:calc(100vw - 32px);
+padding:12px;
+background:#fff;
+border:1px solid #e1e1e1;
+border-radius:16px;
+box-shadow:0 6px 18px #0003,0 2px 6px #0002;
+pointer-events:auto}
+.numpad-display {
+height:65px;
+margin-bottom:12px;
+padding:0 17px;
+display:flex;
+align-items:center;
+justify-content:flex-end;
+overflow:hidden;
+border:1px solid #d7d7d7;
+border-radius:11px;
+background:#fafafa;
+font:600 24px ui-monospace,monospace;
+white-space:nowrap}
+.numpad-grid {
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:8px}
+.numpad-key {
+height:48px;
+padding:0;
+border:1px solid #d3d3d3;
+border-radius:10px;
+background:#fff;
+color:#292929;
+font-size:18px;
+font-weight:700;
+touch-action:manipulation}
+.numpad-key:active {
+background:#e9e9e9;
+transform:scale(.97)}
+.numpad-key.clear {
+background:#f7f7f7}
+.numpad-valid {
+width:100%;
+height:44px;
+margin-top:10px;
+border:0;
+border-radius:10px;
+background:#43ad4d;
+color:#fff;
+font-size:22px;
+font-weight:700}
+    @media(max-width:900px) {
+.inventory-table th,.inventory-table td {
+padding:6px;
+font-size:13px}
+.inventory-table .qty {
+width:72px}
+.content {
+padding:8px}
+.card {
+padding:9px}
+}
+@media(max-width:700px) {
+.bundle-item {
+align-items:flex-start;
+flex-wrap:wrap}
+.bundle-item .actions {
+width:100%;
+margin-left:36px}
+.numpad {
+right:8px;
+bottom:8px;
+width:min(300px,calc(100vw - 16px))}
+}
   </style>
 </head>
-<body class="min-h-screen text-gray-100">
-  <div class="max-w-md mx-auto p-4 pb-28">
-    <!-- (Titres supprimés comme demandé) -->
-
-    <!-- Tableau de saisie -->
-    <section class="mb-4">
-      <div class="rounded-2xl shadow-sm overflow-hidden card">
-        <table class="w-full text-sm">
-          <thead class="text-gray-200">
-  <tr>
-    <th class="text-center p-2 w-[72px] sm:w-[84px]">Vrac 🟡</th>
-    <th class="text-left p-2 w-[50px]  sm:w-[58px]">Rouleaux</th>
-    <th class="text-center p-2 w-[86px]  sm:w-[100px]">Valeur €</th>
-    <th class="text-left p-2">Total 💰</th>
-  </tr>
-</thead>
-
-          <tbody id="tbody" class="divide-y divide-gray-700"></tbody>
-          <tfoot>
-  <tr>
-    <td colspan="3" class="p-2 text-lg font-semibold text-gray-200">Total caisse :</td>
-    <td
-      id="totalCaisse"
-      class="p-2 text-right mono font-bold text-yellow-400 whitespace-nowrap pr-2 sm:pr-4 text-2xl"
-    >
-      0,00 €
-    </td>
-  </tr>
-</tfoot>
-
-        </table>
-      </div>
-    </section>
-
-
-
-    <!-- Actions principales -->
-    <section class="sticky-cta rounded-2xl">
-      <div class="flex items-center gap-2">
-        <button id="btnCalculer" class="flex-1 px-4 py-3 rounded-2xl bg-yellow-400 text-black font-semibold shadow hover:bg-yellow-300 active:translate-y-px">Calculer la recette</button>
-        <button id="btnReset" class="px-4 py-3 rounded-2xl bg-black text-gray-200 hover:bg-gray-900">Réinitialiser</button>
-      </div>
-    </section>
-
-    <!-- Résultats -->
-    <section class="mt-4" id="resultats" hidden>
-      <div class="rounded-2xl shadow-sm p-3 card">
-        <div class="grid grid-cols-1 gap-3">
-          <div class="p-3 rounded-xl bg-gray-800/70 border border-gray-600 text-center">
-            <div class="text-sm uppercase tracking-wide text-gray-400">RECETTE À ENVOYER ✉️</div>
-            <div class="text-2xl font-bold mono text-yellow-400" id="valRecette">—</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="rounded-2xl shadow-sm p-3 mt-3 card">
-        <div class="flex items-center justify-between mb-2">
-          <h4 class="font-semibold text-yellow-400">DÉTAIL RECETTE :</h4>
-          <span class="text-sm text-gray-400">Fond sélectionné : <strong id="fondActuelBadge" class="text-gray-100">200,00 €</strong></span>
-        </div>
-        <div id="detailRecette" class="text-sm space-y-1 text-center"></div>
-      </div>
-    </section>
-  </div>
-
-<!-- Signature -->
-<div class="signature text-yellow-300 italic font-light tracking-wide text-base flex items-center justify-center gap-1 mt-6" style="transform: skewX(-10deg);">
-  By Edithe 💛 
-    <path d="M12 21s-6.716-4.373-9.33-7.117C.93 11.02 1.238 7.94 3.343 6.02 5.26 4.288 8.093 4.61 10 6.243c1.907-1.633 4.74-1.955 6.657-.223 2.105 1.92 2.413 5 .673 7.863C18.716 16.627 12 21 12 21z"/>
-  </svg>
+<body>
+<header>
+<div class="topbar">
+<h1>📦 Inventaire — Bundles</h1>
+<div class="actions">
+<span id="catalogStatus" class="muted">
+</span>
+<button id="btnRefreshBundles" class="secondary">☁️ Actualiser les bundles</button>
+<button id="btnSyncCatalog">📥 Télécharger / mettre à jour le catalogue</button>
 </div>
+</div>
+</header>
+<button id="btnJumpToSearch" class="hidden" style="position:fixed;right:12px;top:120px;z-index:20;border-radius:50%;width:56px;height:56px;font-size:28px">↑</button>
+<div class="content">
+<section id="sectionList">
+<div class="card">
+<div class="row">
+<div>
+<label>Espace</label>
+<br>
+<select id="newBundleSpace">
+</select>
+</div>
+<div>
+<label>Zone</label>
+<br>
+<select id="newBundleZone" disabled>
+<option value="">Choisir une zone…</option>
+</select>
+</div>
+<div>
+<label>Nom d’équipe</label>
+<br>
+<input id="newTeamName" placeholder="Ex. Jean Michel">
+</div>
+<button id="btnCreate">Créer</button>
+</div>
+</div>
+<div class="card row">
+<span class="muted">N’exporte que les bundles prêts.</span>
+<span class="spacer">
+</span>
+<button id="btnSendAll">📤 Exporter les bundles prêts</button>
+</div>
+<div id="listEmpty" class="muted">Aucun bundle pour l’instant.</div>
+<div id="bundlesList" class="bundle-list">
+</div>
+</section>
+<section id="sectionBundle" class="hidden">
+<div class="toolbar">
+<button id="btnBack" class="secondary">← Retour</button>
+<strong id="bundleTitle">
+</strong>
+<span id="bundleMeta" class="muted">
+</span>
+<span class="spacer">
+</span>
+<span id="bundleSaveStatus" class="muted">
+</span>
+<button id="btnForceBundle" class="save-btn" style="display:none">
+  ⚠️ Forcer ma version
+</button>
+<button id="btnSaveBundle" class="save-btn">💾 Sauvegarder</button>
+</div>
+<div id="numPadOverlay" class="numpad-overlay" aria-hidden="true">
+<div class="numpad">
+<div id="numPadDisplay" class="numpad-display">0</div>
+<div class="numpad-grid">
+<button type="button" class="numpad-key" data-num="1">1</button>
+<button type="button" class="numpad-key" data-num="2">2</button>
+<button type="button" class="numpad-key" data-num="3">3</button>
+<button type="button" class="numpad-key" data-num="4">4</button>
+<button type="button" class="numpad-key" data-num="5">5</button>
+<button type="button" class="numpad-key" data-num="6">6</button>
+<button type="button" class="numpad-key" data-num="7">7</button>
+<button type="button" class="numpad-key" data-num="8">8</button>
+<button type="button" class="numpad-key" data-num="9">9</button>
+<button type="button" class="numpad-key" data-op="-">-</button>
+<button type="button" class="numpad-key" data-num="0">0</button>
+<button type="button" class="numpad-key" data-op="+">+</button>
+<button type="button" class="numpad-key" data-op="*">*</button>
+<button id="numPadBackspace" type="button" class="numpad-key">⌫</button>
+<button id="numPadClear" type="button" class="numpad-key clear">C</button>
+</div>
+<button id="numPadValidate" type="button" class="numpad-valid">✓</button>
+</div>
+</div>
+<div class="card">
+<h3>📥 Ajouter des articles / 🔎 Rechercher</h3>
+<div class="row">
+<div>
+<label>Code Barre</label>
+<br>
+<input id="s_cb" placeholder="Scan / saisie">
+</div>
+<div>
+<label>Code IREC</label>
+<br>
+<input id="s_irec" placeholder="IREC-001234">
+</div>
+<div>
+<label>Intitulé</label>
+<br>
+<input id="s_int" placeholder="Ex. Mug volcan">
+</div>
+<button id="btnClearSearch" class="secondary">✖</button>
+</div>
+<div id="bundleSearchMsg" class="muted">
+</div>
+<div id="bundleSearchResults">
+</div>
+</div>
+<div class="card">
+<h3>📦 Articles du bundle</h3>
+<div id="bundleMsg" class="notice hidden">
+</div>
+<div id="bundleTableWrap">
+</div>
+<div id="bundleFooter" class="toolbar">
+</div>
+</div>
+</section>
+</div>
+<script>
+const $=id=>document.getElementById(id),show=el=>el&&el.classList.remove('hidden'),hide=el=>el&&el.classList.add('hidden');
+const BUNDLES_KEY='bundles_v3',TEAM_NAME_KEY='inv_team_name',DEVICE_ID_KEY='inv_device_id';let spaces=[],currentBundleId=null,timer=null,highlightedRowNumber=null;
+function load(){try{const v=JSON.parse(localStorage.getItem(BUNDLES_KEY)||'[]');return Array.isArray(v)?v:[]}catch(e){return[]}}function save(v){localStorage.setItem(BUNDLES_KEY,JSON.stringify(v))}function getBundle(id){return load().find(x=>x.id===id)}function uuid(){return'b_'+Math.random().toString(36).slice(2)+Date.now().toString(36)}function mutate(id,fn){const a=load(),b=a.find(x=>x.id===id);if(!b)return null;fn(b);save(a);return b}function deleteBundle(id){save(load().filter(x=>x.id!==id))}function getDeviceId(){let id=localStorage.getItem(DEVICE_ID_KEY);if(!id){id='device_'+Math.random().toString(36).slice(2)+'_'+Date.now().toString(36);localStorage.setItem(DEVICE_ID_KEY,id)}return id}
+function migrateLocalBundles(){const a=load();let c=false;a.forEach(b=>{for(const[k,v]of Object.entries({serverVersion:0,serverSavedAt:null,dirty:true,syncConflict:false,remoteDeleted:false,sharedStatus:'ACTIVE'}))if(typeof b[k]==='undefined'){b[k]=v;c=true}});if(c)save(a)}
+function createBundle(zoneName,spaceKey,teamName){const sp=spaces.find(x=>x.key===spaceKey),b={id:uuid(),zoneName,spaceKey,spaceName:sp?.displayName||'',createdAt:Date.now(),phase:'count1',ready:false,teamName:teamName.trim(),items:[],serverVersion:0,serverSavedAt:null,sharedStatus:'ACTIVE',dirty:true,syncConflict:false,remoteDeleted:false};const a=load();a.push(b);save(a);return b.id}
+function setPhase(id,phase){mutate(id,b=>{b.phase=phase;if(phase!=='final')b.ready=false;b.dirty=true});renderBundleView()}function setReady(id,v){mutate(id,b=>{b.ready=!!v;b.dirty=true})}function setCount(id,rowNumber,field,value,itemRef){mutate(id,b=>{const it=b.items.find(x=>x.rowNumber===rowNumber&&x.label===itemRef.label&&x.dupNote===itemRef.dupNote);if(!it)return;it[field]=value===''?null:Number(value);if(field!=='final')b.ready=false;b.dirty=true});updateBundleSaveStatus()}function removeItemFromBundle(id,it){mutate(id,b=>{b.items=b.items.filter(x=>!(x.rowNumber===it.rowNumber&&x.label===it.label&&x.dupNote===it.dupNote));b.dirty=true})}
+function populateZonesForSpace(){const sp=spaces.find(x=>x.key===$('newBundleSpace').value),z=$('newBundleZone');z.innerHTML='<option value="">Choisir une zone...</option>';(sp?.zones||[]).forEach(v=>z.add(new Option(v,v)));z.disabled=!(sp?.zones||[]).length}function loadSpaces(){google.script.run.withSuccessHandler(d=>{spaces=d?.spaces||[];const s=$('newBundleSpace');s.innerHTML='';spaces.forEach(x=>s.add(new Option(x.displayName,x.key)));s.onchange=populateZonesForSpace;populateZonesForSpace();renderBundles()}).withFailureHandler(e=>alert('Erreur espaces : '+(e?.message||e))).getZonesConfig()}
+function checkConnectivity(timeoutMs=4000){return new Promise(resolve=>{if(!navigator.onLine)return resolve(false);let done=false,t=setTimeout(()=>{if(!done){done=true;resolve(false)}},timeoutMs);google.script.run.withSuccessHandler(()=>{if(!done){clearTimeout(t);done=true;resolve(true)}}).withFailureHandler(()=>{if(!done){clearTimeout(t);done=true;resolve(false)}}).ping()})}
+async function deleteSharedUI(bundle,button){if(!Number(bundle.serverVersion||0)){if(confirm('Supprimer ce bundle ?')){deleteBundle(bundle.id);renderBundles()}return}if(!confirm('⚠️ Supprimer définitivement ce bundle ?'))return;if(!await checkConnectivity())return alert('📴 Connexion Internet nécessaire.');const old=button.textContent;button.disabled=true;button.textContent='⏳';google.script.run.withSuccessHandler(res=>{button.disabled=false;button.textContent=old;if(res?.conflict)return alert('⚠️ Version plus récente, actualise les bundles.');if(res?.approved)return alert('✅ Bundle déjà validé, suppression impossible.');if(!res?.ok)return alert('❌ Suppression impossible.');deleteBundle(bundle.id);currentBundleId===bundle.id?backToList():renderBundles()}).withFailureHandler(e=>{button.disabled=false;button.textContent=old;alert('❌ '+(e?.message||e))}).deleteSharedBundle({bundleId:bundle.id,serverVersion:Number(bundle.serverVersion||0),deviceId:getDeviceId()})}
+function renderBundles(){const bs=load().sort((a,b)=>b.createdAt-a.createdAt),host=$('bundlesList');host.innerHTML='';$('listEmpty').style.display=bs.length?'none':'';bs.forEach(bundle=>{const row=document.createElement('div');row.className='bundle-item';if(bundle.phase==='final'&&bundle.ready){row.classList.add('bundle-ready')}const phase=bundle.phase==='count1'?['phase1','1er comptage']:bundle.phase==='count2'?['phase2','2e comptage']:['final','Synthèse'];row.innerHTML=`<div class="icon">📁</div><div class="body"><div class="title"></div><div class="badges"><span class="badge ${phase[0]}">${phase[1]}</span><span class="badge count">${(bundle.items||[]).length} article(s)</span></div><div class="meta"></div></div><div class="actions"></div>`;row.querySelector('.title').textContent=bundle.zoneName;row.querySelector('.meta').textContent=`${bundle.spaceName||'—'} • ${new Date(bundle.createdAt).toLocaleString()}`+(bundle.teamName?` • Équipe: ${bundle.teamName}`:'');const badges=row.querySelector('.badges'),add=(c,t)=>{const x=document.createElement('span');x.className='badge '+c;x.textContent=t;badges.append(x)};if(bundle.remoteDeleted)add('conflict','🗑️ Supprimé serveur');else if(bundle.syncConflict)add('conflict','⚠️ Conflit');else if(bundle.dirty)add('dirty','⚠️ Non sauvegardé');else if(bundle.serverVersion)add('cloud','☁️ Partagé');if(bundle.sharedStatus==='PENDING'||bundle.pendingAt)add('pending','En attente');if(bundle.ready&&bundle.phase==='final')add('ready','Prêt à l’export');const actions=row.querySelector('.actions'),mk=(t,h)=>{const b=document.createElement('button');b.className='secondary';b.textContent=t;b.onclick=h;return b},open=mk('📂 Ouvrir',()=>openBundle(bundle.id)),del=mk('🗑️',()=>deleteSharedUI(bundle,del)),send=mk('📤 Exporter',()=>sendOne(bundle)),stat=mk('🔄 Statut',()=>checkBundleStatus(bundle.id));send.disabled=!(bundle.phase==='final'&&bundle.ready)||bundle.dirty||bundle.pendingAt||bundle.sharedStatus==='PENDING';actions.append(open,del,send,stat);host.append(row)})}
+function openBundle(id){currentBundleId=id;hide($('sectionList'));show($('sectionBundle'));show($('btnJumpToSearch'));renderBundleView()}function backToList(){currentBundleId=null;show($('sectionList'));hide($('sectionBundle'));hide($('btnJumpToSearch'));renderBundles()}function renderBundleView(){const b=getBundle(currentBundleId);if(!b)return backToList();$('bundleTitle').textContent='📁 '+b.zoneName;$('bundleMeta').textContent=`${b.spaceName||'—'}`+(b.teamName?` • Équipe: ${b.teamName}`:'')+` • ${b.items.length} article(s)`;renderBundleTable(b);renderFooter(b);updateBundleSaveStatus();hookBundleSearch()}
+function updateBundleSaveStatus(){const b=getBundle(currentBundleId),s=$('bundleSaveStatus'),bt=$('btnSaveBundle');if(!b)return;if(b.remoteDeleted){s.textContent='🗑️ Supprimé serveur';bt.disabled=true;return}if(b.sharedStatus==='PENDING'){s.textContent='⏳ En attente';bt.disabled=true;return}bt.disabled=false;if(b.syncConflict){
+  s.textContent='⚠️ Conflit';
+  $('btnForceBundle').style.display = '';
+  return;
+}
+$('btnForceBundle').style.display = 'none';if(b.dirty){s.textContent='⚠️ Modifications non sauvegardées';bt.classList.add('dirty');return}s.textContent=b.serverSavedAt?'☁️ Sauvegardé '+new Date(b.serverSavedAt).toLocaleString():'Sauvegarde serveur non effectuée';bt.classList.remove('dirty')}
+function renderBundleTable(bundle){const wrap=$('bundleTableWrap');if(!bundle.items.length){wrap.innerHTML='<p class="muted">Ce bundle est vide.</p>';return}const fields=bundle.phase==='count1'?['1er comptage']:bundle.phase==='count2'?['2e comptage']:['1er','2e','Stock final'];wrap.innerHTML=`<table class="inventory-table"><thead><tr><th class="col-line">Ligne</th><th class="col-barcode">Code barre</th><th class="col-irec">Code IREC</th><th class="col-reference">Référence</th>${fields.map(x=>`<th class="col-count">${x}</th>`).join('')}${bundle.phase==='count1'?'<th class="col-remove">Retirer</th>':''}</tr></thead><tbody></tbody></table>`;const body=wrap.querySelector('tbody');[...bundle.items].sort((a,b)=>(b.addedAt||0)-(a.addedAt||0)).forEach(item=>{const row=document.createElement('tr');row.dataset.rowNumber=String(item.rowNumber);row.innerHTML='<td class="col-line"></td><td class="col-barcode"></td><td class="col-irec"></td><td class="col-reference ellipsis"></td>';row.children[0].textContent=item.rowNumber??'';row.children[1].textContent=item.codeBarre||'';row.children[2].textContent=item.codeIrec||'';row.children[3].textContent=(item.label||'')+(item.dupNote?` (${item.dupNote})`:'');const inp=(field,value)=>{const c=document.createElement('td');c.className='col-count';const i=document.createElement('input');i.className='qty';i.type='text';i.inputMode='none';i.readOnly=true;i.value=value??'';i.disabled=bundle.sharedStatus==='PENDING'||bundle.remoteDeleted;i.onclick=async()=>{if(i.disabled)return;highlightedRowNumber=Number(item.rowNumber);applyArticleHighlight();const orig=item[field]??'',q=await NumPad.open(orig,v=>i.value=v==null?'':String(v));if(q==null){i.value=orig;return}setCount(bundle.id,item.rowNumber,field,q,item);renderBundleView()};c.append(i);return c};if(bundle.phase==='count1'){row.append(inp('count1',item.count1));const c=document.createElement('td');c.className='col-remove';const b=document.createElement('button');b.className='secondary';b.textContent='🗑️';b.onclick=()=>{if(confirm('Retirer cet article ?')){removeItemFromBundle(bundle.id,item);renderBundleView()}};c.append(b);row.append(c)}else if(bundle.phase==='count2')row.append(inp('count2',item.count2));else{const c1=document.createElement('td'),c2=document.createElement('td');c1.className=c2.className='col-count';c1.textContent=item.count1??'';c2.textContent=item.count2??'';const both=item.count1!=null&&item.count2!=null,match=both&&Number(item.count1)===Number(item.count2),mismatch=both&&!match;if(match&&Number(item.final)!==Number(item.count1)){setCount(bundle.id,item.rowNumber,'final',Number(item.count1),item);item.final=Number(item.count1)}const cf=inp('final',item.final),fi=cf.querySelector('.qty');if(fi&&mismatch)fi.classList.add('warn-final');row.append(c1,c2,cf)}body.append(row)});requestAnimationFrame(applyArticleHighlight)}
+function renderFooter(b){const f=$('bundleFooter');f.innerHTML='';if(b.sharedStatus==='PENDING'||b.remoteDeleted)return;const mk=(t,h,c='')=>{const x=document.createElement('button');x.textContent=t;x.className=c;x.onclick=h;return x};if(b.phase==='count1')return f.append(mk('✅ Confirmer le 1er comptage',()=>setPhase(b.id,'count2')));if(b.phase==='count2')return f.append(mk('✅ Confirmer le 2e comptage',()=>setPhase(b.id,'final')),mk('↩ Revenir au 1er comptage',()=>{if(prompt('Code référent :')==='1013')setPhase(b.id,'count1')},'secondary'));const c=mk(b.ready?'✅ Bundle confirmé':'✅ Confirmer le bundle',()=>{setReady(b.id,true);backToList()});c.disabled=!(b.items.length&&b.items.every(x=>x.final!=null));f.append(c,mk('↩ Revenir au 2e comptage',()=>{if(prompt('Code référent :')==='1013'){setPhase(b.id,'count2');setReady(b.id,false)}},'secondary'))}
+function applyArticleHighlight(){const body=$('bundleTableWrap')?.querySelector('tbody');if(!body)return;body.querySelectorAll('.row-highlight').forEach(r=>r.classList.remove('row-highlight'));if(highlightedRowNumber==null)return;for(const r of body.querySelectorAll('tr[data-row-number]'))if(Number(r.dataset.rowNumber)===Number(highlightedRowNumber)){r.classList.add('row-highlight');r.scrollIntoView({behavior:'smooth',block:'center'});break}}
+const NumPad=(()=>{let expression='',resolver=null,preview=null;const overlay=()=>$('numPadOverlay'),display=()=>$('numPadDisplay');function calc(v){const t=String(v||'').replace(/\s+/g,'');if(!t||!/^[0-9+\-*]+$/.test(t)||/^[+*]/.test(t)||/[+\-*]$/.test(t))return null;const tokens=t.match(/\d+|[+\-*]/g),p=[];let i=0;while(i<tokens.length){if(tokens[i]==='*'){if(!p.length||i+1>=tokens.length)return null;p.push(String(Number(p.pop())*Number(tokens[i+1])));i+=2}else p.push(tokens[i++])}let r=Number(p[0]);for(let j=1;j<p.length;j+=2){const n=Number(p[j+1]);if(p[j]==='+')r+=n;else if(p[j]==='-')r-=n;else return null}return Number.isFinite(r)&&r>=0?r:null}function update(){display().textContent=expression||'0';if(preview){if(!expression)return preview('');const c=calc(expression);if(c!=null)return preview(c);const p=calc(expression.replace(/[+\-*]+$/,''));preview(p!=null?p:'')}}function close(v){overlay().classList.remove('show');preview=null;if(resolver){const r=resolver;resolver=null;r(v)}}function validate(){const r=calc(expression);if(r==null)return;close(r)}function open(v='',cb=null){expression=v==null?'':String(v);if(expression==='0')expression='';preview=typeof cb==='function'?cb:null;update();overlay().classList.add('show');return new Promise(r=>resolver=r)}document.querySelectorAll('[data-num]').forEach(b=>b.onclick=()=>{expression+=b.dataset.num;update()});document.querySelectorAll('[data-op]').forEach(b=>b.onclick=()=>{if(!expression)return;const op=b.dataset.op,last=expression.slice(-1);expression=['+','-','*'].includes(last)?expression.slice(0,-1)+op:expression+op;update()});$('numPadBackspace').onclick=()=>{expression=expression.slice(0,-1);update()};$('numPadClear').onclick=()=>{expression='';update()};$('numPadValidate').onclick=validate;document.addEventListener('keydown',e=>{if(!overlay().classList.contains('show'))return;if(/^[0-9]$/.test(e.key)){e.preventDefault();expression+=e.key;update()}else if(['+','-','*'].includes(e.key)){e.preventDefault();const l=expression.slice(-1);if(expression){expression=['+','-','*'].includes(l)?expression.slice(0,-1)+e.key:expression+e.key;update()}}else if(e.key==='Enter'){e.preventDefault();validate()}else if(e.key==='Escape'){e.preventDefault();close(null)}});document.addEventListener('pointerdown',e=>{if(!overlay().classList.contains('show'))return;const pad=overlay().querySelector('.numpad');if(pad&&!pad.contains(e.target))close(null)});return{open}})();
+function focusBarcodeSearch(){
+  $('s_cb').value=$('s_irec').value=$('s_int').value='';
+  closeSearchResults();
 
-  <!-- MODAL de sélection du fond -->
-  <div id="fondModal" class="fixed inset-0 z-50 hidden" aria-labelledby="fondTitle" aria-modal="true" role="dialog">
-    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" data-close="backdrop"></div>
-    <div class="relative max-w-md mx-auto mt-24 card rounded-2xl shadow-xl overflow-hidden">
-      <div class="p-4 border-b border-gray-700">
-        <h3 id="fondTitle" class="text-lg font-semibold text-yellow-400">Choisir le fond de caisse</h3>
-        <p class="text-sm text-gray-400">Sélectionnez un fond à conserver avant de calculer la recette.</p>
-      </div>
-      <div class="p-4 space-y-3">
-        <!-- Billetterie -->
-        <label class="flex items-center gap-3 p-3 rounded-xl border border-gray-700 hover:bg-gray-800 cursor-pointer">
-          <input type="radio" name="fondChoice" value="20000" class="radio-gold" />
-          <div>
-            <div class="font-medium">Fond Billetterie</div>
-            <div class="text-lg font-semibold text-yellow-400">200,00 €</div>
-          </div>
-        </label>
-        <!-- Boutique -->
-        <label class="flex items-center gap-3 p-3 rounded-xl border border-gray-700 hover:bg-gray-800 cursor-pointer">
-          <input type="radio" name="fondChoice" value="25000" class="radio-gold" />
-          <div>
-            <div class="font-medium">Fond Boutique</div>
-            <div class="text-lg font-semibold text-yellow-400">250,00 €</div>
-          </div>
-        </label>
-        <!-- Fond personnalisé (tout le bloc cliquable comme les autres) -->
-        <label for="fondCustomRadio" class="flex items-start gap-3 p-3 rounded-xl border border-gray-700 hover:bg-gray-800 cursor-pointer">
-          <input type="radio" id="fondCustomRadio" name="fondChoice" value="custom" class="radio-gold mt-1" />
-          <div class="flex-1">
-            <div class="font-medium">Fond personnalisé</div>
-            <div class="mt-1 flex items-center gap-2">
-              <input id="fondCustom" type="number" step="0.01" inputmode="decimal"
-                     class="w-32 px-2 py-1 rounded-lg border border-gray-700 bg-gray-800 text-gray-100"
-                     placeholder="ex : 150" />
-              <span class="text-xs text-gray-400">€</span>
-            </div>
-          </div>
-        </label>
-        <p id="fondCustomHint" class="mt-2 text-xs text-rose-400 hidden">Veuillez saisir un montant valide ≥ 0.</p>
-      </div>
-      <div class="p-4 border-t border-gray-700 flex items-center justify-end gap-2">
-        <button id="fondCancel" class="px-3 py-2 rounded-xl">Annuler</button>
-        <button id="fondConfirm" class="px-4 py-2 rounded-xl bg-yellow-400 text-black font-semibold hover:bg-yellow-300">Confirmer</button>
-      </div>
-    </div>
-  </div>
+  $('s_cb').focus();
+  $('s_cb').select();
+}
 
-  <script>
-    // --- Modèle des dénominations (centimes) ---
-    const EURO = {
-  coins: [
-    { value: 1,   label: '<span class="whitespace-nowrap"><span class="text-[10px]">🟤</span><span class="ml-1 text-[13px] font-medium align-middle">1 c</span></span>', roll: 50 },
-    { value: 2,   label: '<span class="whitespace-nowrap"><span class="text-[11px]">🟤</span><span class="ml-1 text-[13px] font-medium align-middle">2 c</span></span>', roll: 50 },
-    { value: 5,   label: '<span class="whitespace-nowrap"><span class="text-xs">🟤</span><span class="ml-1 text-[13px] font-medium align-middle">5 c</span></span>', roll: 50 },
-    { value: 10,  label: '<span class="whitespace-nowrap"><span class="mr-1 text-sm">🟡</span><span class="text-[13px] font-medium align-middle">10 c</span></span>', roll: 40 },
-    { value: 20,  label: '<span class="whitespace-nowrap"><span class="mr-1 text-base">🟡</span><span class="text-[13px] font-medium align-middle">20 c</span></span>', roll: 40 },
-    { value: 50,  label: '<span class="whitespace-nowrap"><span class="mr-1 text-lg">🟡</span><span class="text-[13px] font-medium align-middle">50 c</span></span>', roll: 40 },
-    { value: 100, label: '<span class="whitespace-nowrap"><span class="text-lg">🪙</span><span class="ml-1 text-[13px] font-medium align-middle">1 €</span></span>', roll: 25 },
-    { value: 200, label: '<span class="whitespace-nowrap"><span class="text-xl">🪙</span><span class="ml-1 text-[13px] font-medium align-middle">2 €</span></span>', roll: 25 },
-  ],
-  notes: [5,10,20,50,100,200,500].map(v => ({
-    value: v*100,
-    label:
-      v === 5  ? `<span class="whitespace-nowrap"><span class="text-lg">💶</span> ${v} €</span>` :
-      v === 10 ? `<span class="whitespace-nowrap"><span class="text-lg">💴</span> ${v} €</span>` :
-      v <= 20  ? `<span class="whitespace-nowrap"><span class="text-lg">💷</span> ${v} €</span>` :
-      v <= 100 ? `<span class="whitespace-nowrap"><span class="text-xl">💵</span> ${v} €</span>` :
-                 `<span class="whitespace-nowrap"><span class="text-2xl">💶</span> ${v} €</span>`
-  }))
-};
+async function addItemToBundle(id,item){const b=getBundle(id);if(!b||b.phase!=='count1')return;let it=b.items.find(x=>x.rowNumber===item.rowNumber);if(!it){it={rowNumber:item.rowNumber,codeBarre:item.codeBarre||'',codeIrec:item.codeIrec||'',label:item.intitule||'',dupNote:null,count1:null,count2:null,final:null,addedAt:Date.now()};mutate(id,t=>{t.items.unshift(it);t.dirty=true})}highlightedRowNumber=Number(it.rowNumber);renderBundleView();closeSearchResults();const input=$('bundleTableWrap')?.querySelector(`tr[data-row-number="${it.rowNumber}"] input.qty`),orig=it.count1??'',q=await NumPad.open(orig,v=>{if(input)input.value=v==null?'':String(v)});if(q!=null){const fresh=getBundle(id)?.items.find(x=>x.rowNumber===it.rowNumber);if(fresh)setCount(id,fresh.rowNumber,'count1',q,fresh);renderBundleView()}setTimeout(focusBarcodeSearch,50)}
+const normTxt=s=>(s||'').toString().trim(),
+      foldAcc=s=>normTxt(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''),
+      foldForContains=s=>foldAcc(s).replace(/[^a-z0-9]+/g,' ').trim(),
+      normIrc=s=>normTxt(s).toUpperCase().replace(/\s+|-/g,''),
+      digits=s=>(s||'').toString().replace(/\D/g,'');
 
-    // Etat courant
-    const state = {
-      fondCible: 20000, // en centimes (par défaut 200€)
-      inputs: {},
-      lastFondChoice: '20000'
+function barcodeMatch(catalogBarcode, scannedBarcode){
+  const v = digits(catalogBarcode).replace(/^0+/,'');
+  const q = digits(scannedBarcode).replace(/^0+/,'');
+
+  if(!v || !q) return false;
+
+  // Correspondance exacte
+  if(v === q) return true;
+
+  // Cas 12 ↔ 13 chiffres
+  if(v.length === q.length + 1 && v.startsWith(q))
+    return true;
+
+  if(q.length === v.length + 1 && q.startsWith(v))
+    return true;
+
+  // Même code avec chiffre de contrôle différent
+  if(
+    v.length === q.length &&
+    v.length >= 8 &&
+    v.slice(0,-1) === q.slice(0,-1)
+  ){
+    return true;
+  }
+
+  return false;
+}
+
+function closeSearchResults(){$('bundleSearchResults').innerHTML='';$('bundleSearchMsg').textContent=''}
+async function bundleSearch(){const cb=$('s_cb').value.trim(),ir=$('s_irec').value.trim(),ti=$('s_int').value.trim(),out=$('bundleSearchResults'),msg=$('bundleSearchMsg');if(!cb&&!ir&&!ti){out.innerHTML='';msg.textContent='Saisis un code ou un intitulé.';return}msg.textContent='Recherche…';let results=[],local=await idbGetAll('catalog');if(local.length){if(ir)results=local.filter(x=>normIrc(x.codeIrec)===normIrc(ir));else if(cb){
+
+  const q = digits(cb).replace(/^0+/,'');
+
+  // Attend qu'un vrai code soit terminé
+  if(q.length < 8){
+    msg.textContent = 'Lecture du code-barres...';
+    out.innerHTML = '';
+    return;
+  }
+
+  results = local.filter(
+  x => barcodeMatch(x.codeBarre, q)
+).slice(0,10);
+}else{const q=foldForContains(ti);results=local.filter(x=>foldForContains(x.intitule).includes(q)).slice(0,100)}}else results=await new Promise(r=>google.script.run.withSuccessHandler(x=>r(x?.results||[])).withFailureHandler(()=>r([])).searchItems({codeBarre:cb,codeIrec:ir,intitule:ti}));msg.textContent=`${results.length} résultat(s).`;out.innerHTML='';if(!results.length)return;const t=document.createElement('table');t.className='search-table';t.innerHTML='<thead><tr><th>Ligne</th><th>Code</th><th>Intitulé</th><th>Action</th></tr></thead><tbody></tbody>';results.forEach(it=>{const r=document.createElement('tr');r.innerHTML='<td></td><td></td><td></td><td></td>';r.children[0].textContent=it.rowNumber;r.children[1].textContent=it.codeBarre||it.codeIrec||'';r.children[2].textContent=it.intitule||'';const b=document.createElement('button');b.className='secondary';b.textContent='Ajouter';b.onclick=()=>addItemToBundle(currentBundleId,it);r.children[3].append(b);t.tBodies[0].append(r)});out.append(t)}function hookBundleSearch(){
+  ['s_cb','s_irec','s_int'].forEach(id=>{
+    const i=$(id);
+
+    i.oninput=()=>{
+      clearTimeout(timer);
+
+      const isBarcode = id === 's_cb';
+
+      // La douchette Bluetooth saisit les chiffres un par un.
+      // On attend plus longtemps avant de lancer la recherche.
+      timer = setTimeout(
+        bundleSearch,
+        isBarcode ? 1000 : 250
+      );
     };
 
-    const fmt = new Intl.NumberFormat('fr-FR', { style:'currency', currency:'EUR' });
-
-    // --- Construction du tableau de saisie ---
-    const tbody = document.getElementById('tbody');
-    const rows = [];
-function makeRow(key, label, valueCents, hasRoll){
-  const tr = document.createElement('tr');
-  tr.className = 'border-t border-gray-700';
-
-  const rollsCell = hasRoll
-    ? `<select data-key="${key}" data-type="rolls"
-         class="appearance-none w-7 px-2 py-1 rounded-lg border border-black bg-gray-950 text-gray-100 focus:ring-2 focus:ring-gray-500 focus:border-black">
-          ${[0,1,2,3].map(n=>`<option value="${n}">${n}</option>`).join('')}
-       </select>`
-    : `<span class="text-gray-500">—</span>`;
-
-  tr.innerHTML = `
-    <td class="p-2 text-center font-medium">
-      <div class="inline-flex items-center gap-1">
-        <input data-key="${key}" data-type="loose" type="number" min="0" step="1" inputmode="numeric" pattern="[0-9]*"
-          class="appearance-none w-16 px-2 py-1 rounded-lg border border-black bg-gray-950 text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-gray-500 focus:border-black text-sm"
-          value="" placeholder="0"/>
-        <button
-          class="px-2 py-1 rounded-lg border border-black bg-black text-yellow-400 hover:bg-yellow-500 hover:text-black"
-          data-plus="${key}" title="Ajouter au vrac">+</button>
-      </div>
-    </td>
-    <td class="p-2 text-center font-medium">${rollsCell}</td>
-    <td class="p-2 text-center font-semibold text-gray-200">${label}</td>
-  <td class="p-2 text-right mono font-bold text-yellow-400 whitespace-nowrap pr-4" data-total="${key}">0,00 €</td>
-`;
- // <— IMPORTANT : on ferme la template string ici
-
-  tbody.appendChild(tr);
-  rows.push({ key, valueCents, hasRoll });
-}
-
-
-    EURO.coins.forEach((c)=>makeRow('c'+c.value, c.label, c.value, true));
-    EURO.notes.forEach((n)=>makeRow('n'+n.value, n.label, n.value, false));
-
-    // --- Utilitaires ---
-    function getInputCounts(){
-      const inventory = new Map();
-      rows.forEach(r => {
-        const loose = Number(document.querySelector(`input[data-key="${r.key}"][data-type="loose"]`).value || 0);
-        const rollsEl = r.hasRoll ? document.querySelector(`select[data-key="${r.key}"][data-type="rolls"]`) : null;
-        const rolls = rollsEl ? Number(rollsEl.value) : 0;
-        const rollSize = r.hasRoll ? EURO.coins.find(c=>('c'+c.value)===r.key).roll : 0;
-        inventory.set(r.valueCents, { loose, rolls, rollSize });
-      });
-      return inventory;
-    }
-
-    function computeTotals(inv){
-      let total = 0;
-      rows.forEach(r => {
-        const { loose, rolls, rollSize } = inv.get(r.valueCents);
-        const amount = (loose + rolls * rollSize) * r.valueCents;
-        total += amount;
-        document.querySelector(`[data-total="${r.key}"]`).textContent = fmt.format(amount/100);
-      });
-      document.getElementById('totalCaisse').textContent = fmt.format(total/100);
-      return total;
-    }
-
-    function centsToStr(c){ return fmt.format(c/100); }
-
-    // --- Calcul de la recette par DP (préférence gros billets, vrac > rouleaux) ---
-    function calcRecette(inv, fondCible){
-      const total = Array.from(inv.entries()).reduce((s,[v,{loose,rolls,rollSize}])=> s + (loose + rolls*rollSize)*v, 0);
-      const toRecipe = total - fondCible;
-      if (toRecipe < 0) {
-        return { ok:false, message:`Total insuffisant pour atteindre le fond choisi (${centsToStr(fondCible)}). Manque ${centsToStr(-toRecipe)}.` };
+    i.onkeydown=e=>{
+      if(e.key==='Enter'){
+        e.preventDefault();
+        bundleSearch();
       }
-      if (toRecipe === 0) {
-        return { ok:true, recette: new Map(), fond: structuredClone(inv), total, fondCible, recetteTotal:0 };
-      }
-
-      const items = [];
-      // Billets (bucket 'bill')
-      EURO.notes.forEach(n => {
-        const v = n.value; const entry = inv.get(v) || {loose:0, rolls:0, rollSize:0};
-        if (entry.loose>0) items.push({ value:v, count:entry.loose, unitLabel:n.label, bucket:'bill', denom:v });
-      });
-      // Pièces en vrac (bucket 'coin')
-      EURO.coins.forEach(c => {
-        const v = c.value; const entry = inv.get(v) || {loose:0, rolls:0, rollSize:c.roll};
-        if (entry.loose>0) items.push({ value:v, count:entry.loose, unitLabel:c.label, bucket:'coin', denom:v });
-      });
-      // Pièces en rouleaux (bucket 'roll')
-      EURO.coins.forEach(c => {
-        const v = c.value; const entry = inv.get(v) || {loose:0, rolls:0, rollSize:c.roll};
-        if (entry.rolls>0) items.push({ value:v*c.roll, count:entry.rolls, unitLabel:`${c.label} (rouleau x${c.roll})`, bucket:'roll', denom:v });
-      });
-
-      function unitCost(it){
-        const denom = it.bucket==='roll' ? it.denom : it.value;
-        const base = it.bucket==='bill' ? 1000 : (it.bucket==='coin' ? 2000 : 10000);
-        const epsilon = 0.01;
-        return base - epsilon * denom;
-      }
-
-      // Décomposition binaire bornée -> 0/1 knapsack
-      const chunks = [];
-      items.forEach(it => {
-        let k = it.count, pow = 1;
-        while (k>0){
-          const take = Math.min(pow, k);
-          const amount = (it.bucket==='roll') ? it.value : it.value * take;
-          const cost = unitCost(it) * take;
-          chunks.push({ amount, cost, trace:{ bucket:it.bucket, denom:it.denom, unitValue:it.value, take } });
-          k -= take; pow *= 2;
-        }
-      });
-
-      const R = toRecipe;
-      const INF = 1e15;
-      const dp = new Float64Array(R+1);
-      const prev = new Int32Array(R+1);
-      const used = new Int32Array(R+1);
-      for(let i=1;i<=R;i++){ dp[i]=INF; prev[i]=-1; used[i]=-1; }
-      dp[0]=0; prev[0]=-1; used[0]=-1;
-
-      chunks.forEach((ch, idx) => {
-        for(let a=R; a>=ch.amount; a--){
-          const cand = dp[a - ch.amount] + ch.cost;
-          if (cand < dp[a]) { dp[a] = cand; prev[a] = a - ch.amount; used[a] = idx; }
-        }
-      });
-
-      if (!isFinite(dp[R]) || dp[R] >= INF){
-        return { ok:false, message:`Impossible d'atteindre exactement la recette ${centsToStr(R)} avec les valeurs disponibles.` };
-      }
-
-      // Reconstruction
-      const recetteDetail = new Map();
-      let cur = R;
-      while (cur > 0){
-        const idx = used[cur];
-        const ch = chunks[idx];
-        const key = ch.trace.bucket+":"+ch.trace.denom+":"+ch.trace.unitValue;
-        recetteDetail.set(key, (recetteDetail.get(key)||0) + ch.trace.take);
-        cur = prev[cur];
-      }
-
-      const recetteMap = new Map();
-      const fondMap = new Map();
-
-      inv.forEach((e, v) => {
-        fondMap.set(v, { loose: e.loose, rolls: e.rolls, rollSize: e.rollSize });
-        recetteMap.set(v, { bill:0, coin:0, roll:0, rollSize: e.rollSize });
-      });
-
-      recetteDetail.forEach((take, key) => {
-        const [bucket, denomStr, unitValStr] = key.split(":");
-        const denom = Number(denomStr);
-        const unitVal = Number(unitValStr);
-        const target = recetteMap.get(bucket==='roll' ? denom : unitVal) || { bill:0, coin:0, roll:0 };
-        if (bucket==='bill') {
-          target.bill += take;
-          fondMap.get(unitVal).loose -= take;
-        } else if (bucket==='coin') {
-          target.coin += take;
-          fondMap.get(unitVal).loose -= take;
-        } else {
-          target.roll += take;
-          const fm = fondMap.get(denom);
-          fm.rolls -= take;
-        }
-        recetteMap.set(bucket==='roll' ? denom : unitVal, target);
-      });
-
-      const recetteTotal = Array.from(recetteMap.entries()).reduce((s,[v,obj])=>{
-        const rollSize = (fondMap.get(v)?.rollSize)||0;
-        return s + (obj.bill * v) + (obj.coin * v) + (obj.roll * (v * rollSize));
-      }, 0);
-
-      return { ok:true, recette:recetteMap, fond:fondMap, total, fondCible, recetteTotal };
-    }
-
-    // --- Rendu résultats (pièces -> billets) ---
-function renderRecetteOrdered(container, map){
-  container.innerHTML = '';
-
-  const order = EURO.coins.map(c=>({v:c.value}))
-                  .concat(EURO.notes.map(n=>({v:n.value})));
-
-  let any = false;
-
-  order.forEach(({ v }) => {
-    const obj = map.get(v);
-    if (!obj) return;
-
-    const rollSize = obj.rollSize || 0;
-    const line = document.createElement('div');
-    line.className = 'text-base font-semibold text-gray-100'; // un peu plus gros/épais
-
-    const segments = [];
-
-    // Pièces en vrac
-    if (obj.coin) {
-      const seg = document.createElement('span');
-      seg.className = 'inline-flex items-center gap-1';
-      seg.textContent = `${obj.coin}× ${fmt.format(v/100)} `;
-      const emoji = document.createElement('span');
-      emoji.textContent = '🟡';
-      seg.appendChild(emoji);
-      segments.push(seg);
-    }
-
-    // Rouleaux (pièces)
-    if (obj.roll) {
-      const seg = document.createElement('span');
-      seg.className = 'inline-flex items-center gap-1';
-      seg.textContent = `${obj.roll}× ${fmt.format((v*rollSize)/100)} `;
-      const emoji = document.createElement('span');
-      emoji.textContent = '🟡';
-      seg.appendChild(emoji);
-      segments.push(seg);
-    }
-
-    // Billets
-    if (obj.bill) {
-      const seg = document.createElement('span');
-      seg.className = 'inline-flex items-center gap-1';
-      seg.textContent = `${obj.bill}× ${fmt.format(v/100)} `;
-      const emoji = document.createElement('span');
-      emoji.textContent = '💶';
-      seg.appendChild(emoji);
-      segments.push(seg);
-    }
-
-    if (segments.length){
-      any = true;
-      // ajouter avec séparateurs " • "
-      segments.forEach((seg, i) => {
-        line.appendChild(seg);
-        if (i < segments.length - 1){
-          const sep = document.createElement('span');
-          sep.textContent = '  •  ';
-          line.appendChild(sep);
-        }
-      });
-      container.appendChild(line);
-    }
-  });
-
-  if (!any){ container.innerHTML = '<div class="text-gray-500">—</div>'; }
-}
-
-// Restaurer les données si dispo
-const saved = localStorage.getItem("octocash-data");
-if (saved) {
-  const inv = new Map(Object.entries(JSON.parse(saved)).map(([k,v]) => [Number(k), v]));
-
-  rows.forEach(r => {
-    const entry = inv.get(r.valueCents);
-    if (entry) {
-      // Remplir les champs
-      const input = document.querySelector(`input[data-key="${r.key}"][data-type="loose"]`);
-      if (input) input.value = entry.loose || "";
-
-      if (r.hasRoll) {
-        const select = document.querySelector(`select[data-key="${r.key}"][data-type="rolls"]`);
-        if (select) select.value = entry.rolls || "0";
-      }
-    }
+    };
   });
 }
-    // --- Interactions UI ---
-    function refreshTotals(){
-  const inv = getInputCounts();
-  computeTotals(inv);
-
-  // Sauvegarde dans localStorage
-  localStorage.setItem("octocash-data", JSON.stringify(Object.fromEntries(inv)));
-}
-
-    // Recalcul en live
-    tbody.addEventListener('input', refreshTotals);
-    tbody.addEventListener('change', refreshTotals);
-
-    // Boutons "+" pour ajouter au vrac
-tbody.addEventListener('click', (e) => {
-  const btn = e.target.closest('button[data-plus]');
-  if (!btn) return;
-
-  const key = btn.dataset.plus;
-  const input = document.querySelector(`input[data-key="${key}"][data-type="loose"]`);
-  if (!input) return;
-
-  // Focus (ouvre le clavier numérique sur mobile)
-  input.focus();
-
-  // Optionnel: place le curseur à la fin de la valeur existante
-  const val = input.value;
-  input.value = '';
-  input.value = val;
+function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open('inv_offline',1);r.onupgradeneeded=()=>{const d=r.result;if(!d.objectStoreNames.contains('catalog'))d.createObjectStore('catalog',{keyPath:'rowNumber'});if(!d.objectStoreNames.contains('meta'))d.createObjectStore('meta',{keyPath:'key'})};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}async function idbGetAll(s){const d=await openDB();return new Promise((res,rej)=>{const r=d.transaction(s).objectStore(s).getAll();r.onsuccess=()=>res(r.result||[]);r.onerror=()=>rej(r.error)})}async function idbGet(s,k){const d=await openDB();return new Promise((res,rej)=>{const r=d.transaction(s).objectStore(s).get(k);r.onsuccess=()=>res(r.result||null);r.onerror=()=>rej(r.error)})}async function idbPut(s,v){const d=await openDB();return new Promise((res,rej)=>{const t=d.transaction(s,'readwrite');t.objectStore(s).put(v);t.oncomplete=res;t.onerror=()=>rej(t.error)})}async function idbClear(s){const d=await openDB();return new Promise((res,rej)=>{const t=d.transaction(s,'readwrite');t.objectStore(s).clear();t.oncomplete=res;t.onerror=()=>rej(t.error)})}
+async function saveBundleToServer(id){const b=getBundle(id);if(!b)return;if(!await checkConnectivity())return alert('📴 Pas de connexion.');google.script.run.withSuccessHandler(res=>{if(res?.pending)return alert('⏳ Bundle en attente.');if(res?.conflict){mutate(id,x=>x.syncConflict=true);return renderBundleView()}if(!res?.ok)return alert('❌ Sauvegarde impossible.');mutate(id,x=>{x.dirty=false;x.syncConflict=false;x.remoteDeleted=false;x.serverVersion=Number(res.version||0);x.serverSavedAt=Number(res.updatedAt||Date.now());x.sharedStatus='ACTIVE'});renderBundleView()}).withFailureHandler(e=>alert('❌ '+(e?.message||e))).saveSharedBundle({...b,deviceId:getDeviceId(),serverVersion:Number(b.serverVersion||0)})}
+async function refreshSharedBundles(){if(!await checkConnectivity())return alert('📴 Pas de connexion.');const bt=$('btnRefreshBundles');bt.disabled=true;bt.textContent='⏳ Actualisation…';google.script.run.withSuccessHandler(res=>{const remote=res?.bundles||[],approved=new Set((res?.approvedIds||[]).map(String)),local=load(),remoteIds=new Set(remote.map(x=>String(x.id)));remote.forEach(rb=>{const i=local.findIndex(x=>x.id===rb.id),st=String(rb.sharedStatus||'ACTIVE').toUpperCase();if(i<0)local.push({...rb,dirty:false,syncConflict:false,remoteDeleted:false,serverSavedAt:rb.serverUpdatedAt||null,pendingAt:st==='PENDING'?(rb.serverUpdatedAt||Date.now()):null});else{const lb=local[i],lv=Number(lb.serverVersion||0),rv=Number(rb.serverVersion||0);if(rv>lv){if(lb.dirty){lb.syncConflict=true;lb.remoteVersion=rv}else Object.assign(lb,rb,{dirty:false,syncConflict:false,remoteDeleted:false,serverSavedAt:rb.serverUpdatedAt||null,pendingAt:st==='PENDING'?(rb.serverUpdatedAt||Date.now()):null})}else if(rv===lv){lb.sharedStatus=st;lb.remoteDeleted=false;if(st==='ACTIVE')lb.pendingAt=null;else if(st==='PENDING')lb.pendingAt=lb.pendingAt||rb.serverUpdatedAt||Date.now()}}});for(let i=local.length-1;i>=0;i--){const b=local[i];if(!Number(b.serverVersion||0)||remoteIds.has(String(b.id)))continue;if(approved.has(String(b.id))){local.splice(i,1);continue}if(b.dirty){b.syncConflict=true;b.remoteDeleted=true}else local.splice(i,1)}save(local);if(currentBundleId&&!getBundle(currentBundleId))backToList();else{renderBundles();if(currentBundleId)renderBundleView()}bt.disabled=false;bt.textContent='☁️ Actualiser les bundles'}).withFailureHandler(e=>{bt.disabled=false;bt.textContent='☁️ Actualiser les bundles';alert('Erreur : '+(e?.message||e))}).getSharedBundles()}
+function buildExportItems(b){const t={};b.items.forEach(i=>{if(i.final!=null)t[i.rowNumber]=(t[i.rowNumber]||0)+Number(i.final)});return Object.entries(t).map(([rowNumber,final])=>({rowNumber:Number(rowNumber),final}))}function sendBundleToSheet(b){return new Promise(resolve=>google.script.run.withSuccessHandler(res=>{if(res?.ok)mutate(b.id,x=>{x.pendingAt=Date.now();x.sharedStatus='PENDING'});renderBundles();resolve(res)}).withFailureHandler(e=>resolve({ok:false,error:e?.message||String(e)})).submitBundleForApproval({bundleId:b.id,zoneName:b.zoneName,spaceKey:b.spaceKey,teamName:b.teamName||'',items:buildExportItems(b)}))}async function sendOne(b){if(b.dirty)return alert('⚠️ Sauvegarde le bundle avant export.');if(!await checkConnectivity())return alert('📴 Pas de connexion.');const r=await sendBundleToSheet(b);if(!r?.ok)alert('❌ Échec export : '+(r?.error||''))}function checkBundleStatus(id){google.script.run.withSuccessHandler(res=>{const s=String(res?.status||'');mutate(id,b=>{if(/^Approved$/i.test(s)){b.sentAt=Date.now();b.pendingAt=null;b.sharedStatus='APPROVED'}else if(/^Pending$/i.test(s)){b.pendingAt=b.pendingAt||Date.now();b.sharedStatus='PENDING'}else if(/^(Rejected|Deleted)$/i.test(s)){b.pendingAt=null;b.sentAt=null;b.sharedStatus='ACTIVE'}});renderBundles();if(currentBundleId===id)renderBundleView()}).getImportStatus(id)}async function sendAllReadyBundles(){const r=load().filter(b=>b.phase==='final'&&b.ready&&!b.pendingAt&&!b.sentAt&&!b.dirty);if(!r.length)return alert('Aucun bundle prêt à exporter.');for(const b of r)await sendBundleToSheet(b);renderBundles()}
+async function fetchAndStoreCatalog(){if(!await checkConnectivity())return alert('Hors ligne.');const bt=$('btnSyncCatalog');bt.disabled=true;const v=await new Promise(r=>google.script.run.withSuccessHandler(x=>r(x?.version||null)).withFailureHandler(()=>r(null)).getCatalogVersion());if(!v){bt.disabled=false;return alert('Version catalogue indisponible.')}await idbClear('catalog');let start=4,total=0;while(true){const p=await new Promise(r=>google.script.run.withSuccessHandler(r).withFailureHandler(()=>r(null)).getCatalogChunk(start,1000));if(!p?.items)break;for(const it of p.items){await idbPut('catalog',it);total++}if(!p.nextStart)break;start=p.nextStart;$('catalogStatus').textContent=`…${total}`}await idbPut('meta',{key:'catalogVersion',value:v,total});$('catalogStatus').textContent=`offline OK · ${total} articles`;bt.disabled=false;alert(`Catalogue téléchargé (${total} articles).`)}
+function handleCreateBundleClick(){const sp=$('newBundleSpace').value,z=$('newBundleZone').value,t=$('newTeamName').value.trim();if(!sp||!z)return alert('Choisis un espace et une zone.');const ex=load().find(b=>b.spaceKey===sp&&String(b.zoneName).toUpperCase()===z.toUpperCase()&&!b.sentAt);if(ex)return openBundle(ex.id);localStorage.setItem(TEAM_NAME_KEY,t);openBundle(createBundle(z,sp,t))}
+$('btnBack').onclick=backToList;$('btnCreate').onclick=handleCreateBundleClick;$('btnRefreshBundles').onclick=refreshSharedBundles;$('btnSyncCatalog').onclick=fetchAndStoreCatalog;$('btnSendAll').onclick=sendAllReadyBundles;$('btnSaveBundle').onclick=()=>currentBundleId&&saveBundleToServer(currentBundleId);$('btnClearSearch').onclick=()=>{['s_cb','s_irec','s_int'].forEach(id=>$(id).value='');closeSearchResults()};$('btnJumpToSearch').onclick=()=>{$('s_cb').scrollIntoView({behavior:'smooth'});$('s_cb').focus()};$('s_cb').addEventListener('focus', function(){
+  setTimeout(() => this.select(), 0);
 });
 
+$('s_cb').addEventListener('click', function(){
+  this.select();
+});$('btnForceBundle').onclick = () => {
 
-    // --- Modale fond ---
-    const modal = document.getElementById('fondModal');
-    const radios = () => Array.from(document.querySelectorAll('input[name="fondChoice"]'));
-    function openModal(){
-      const toSelect = state.lastFondChoice;
-      radios().forEach(r=>{ r.checked = (r.value===toSelect); });
-      const customInput = document.getElementById('fondCustom');
-      if (customInput) customInput.value = '';
-      document.getElementById('fondCustomHint').classList.add('hidden');
-      modal.classList.remove('hidden');
-      document.body.classList.add('modal-open');
-    }
-    function closeModal(){
-      modal.classList.add('hidden');
-      document.body.classList.remove('modal-open');
-    }
+  const code = prompt('Code référent :');
 
-    modal.addEventListener('click', (e)=>{
-      if (e.target.dataset.close === 'backdrop') closeModal();
-    });
-    document.getElementById('fondCancel').addEventListener('click', closeModal);
+  if (code !== '1013') {
+    alert('Code incorrect');
+    return;
+  }
 
-    document.getElementById('fondCustom').addEventListener('input', ()=>{
-      const customRadio = radios().find(r=>r.value==='custom');
-      if (customRadio) customRadio.checked = true;
-    });
+  const b = getBundle(currentBundleId);
 
-    document.getElementById('fondConfirm').addEventListener('click', ()=>{
-      const choice = radios().find(r=>r.checked);
-      if (!choice) return;
-      let fond = state.fondCible;
-      if (choice.value === 'custom'){
-        const valStr = document.getElementById('fondCustom').value.trim();
-        const num = Number(valStr.replace(',', '.'));
-        if (isNaN(num) || num < 0){
-          document.getElementById('fondCustomHint').classList.remove('hidden');
-          return;
-        }
-        fond = Math.round(num * 100);
-        state.lastFondChoice = 'custom';
-      } else {
-        fond = Number(choice.value);
-        state.lastFondChoice = choice.value;
-      }
-      state.fondCible = fond;
-      closeModal();
-      runCalculation();
-    });
+  if (!b) return;
 
-    // Bouton Calculer -> ouvre la modale
-    document.getElementById('btnCalculer').addEventListener('click', openModal);
+  google.script.run
+    .withSuccessHandler(res => {
 
-    function runCalculation(){
-      const inv = getInputCounts();
-      const res = calcRecette(inv, state.fondCible);
-      const resultSec = document.getElementById('resultats');
-      document.getElementById('fondActuelBadge').textContent = centsToStr(state.fondCible);
-
-      if (!res.ok){
-        resultSec.hidden = false;
-        document.getElementById('valRecette').textContent = res.message;
-        document.getElementById('detailRecette').innerHTML = '';
+      if (!res?.ok) {
+        alert('❌ Sauvegarde impossible');
         return;
       }
-      document.getElementById('valRecette').textContent = centsToStr(res.recetteTotal);
-      renderRecetteOrdered(document.getElementById('detailRecette'), res.recette);
-      resultSec.hidden = false;
-    }
 
-    // Réinitialiser
-    document.getElementById('btnReset').addEventListener('click', () => {
-      document.querySelectorAll('#tbody input').forEach(i => i.value = '');
-      document.querySelectorAll('#tbody select').forEach(s => s.value = '0');
-      refreshTotals();
-      document.getElementById('resultats').hidden = true;
+      mutate(b.id, x => {
+        x.dirty = false;
+        x.syncConflict = false;
+        x.remoteDeleted = false;
+        x.serverVersion = Number(res.version || 0);
+        x.serverSavedAt = Number(res.updatedAt || Date.now());
+      });
+
+      renderBundleView();
+
+      alert('✅ Version forcée');
+
+    })
+    .withFailureHandler(e => {
+      alert('❌ ' + (e?.message || e));
+    })
+    .saveSharedBundle({
+      ...b,
+      force: true,
+      deviceId: getDeviceId(),
+      serverVersion: Number(b.serverVersion || 0)
     });
 
-    // init
-    refreshTotals();
-  </script>
-</body>
-</html>
+};window.addEventListener('load',async()=>{migrateLocalBundles();$('newTeamName').value=localStorage.getItem(TEAM_NAME_KEY)||'';loadSpaces();const m=await idbGet('meta','catalogVersion');$('catalogStatus').textContent=m?`offline OK · ${m.total||''} articles`:'offline inactif : télécharge le catalogue';renderBundles()});
+</script></body></html>
